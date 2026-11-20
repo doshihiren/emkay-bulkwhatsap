@@ -965,7 +965,7 @@ async function loadAudienceList(){
     const r=await fetch('/admin/list-csv?token='+API_TOKEN);
     const d=await r.json();
     const sel=document.getElementById('bc-audience');
-    if(sel) sel.innerHTML='<option value="">-- Saved audiences --</option>'+(d.files||[]).map(f=>'<option value="'+f+'">'+f.replace('.csv','')+'</option>').join('');
+    if(sel) sel.innerHTML='<option value="">-- Saved audiences --</option>'+(d.files||[]).filter(f=>f.startsWith('drive_')).map(f=>'<option value="'+f+'">'+f.replace('.csv','')+'</option>').join('');
   }catch(e){}
 }
 

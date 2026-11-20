@@ -564,6 +564,20 @@ Wholesale & Bulk Enquiries Welcome.`)">🤝 Sales Team</button>
           <option value="2000">2 seconds (safe)</option>
         </select>
       </div>
+      <div class="form-group">
+        <label class="form-label">Delivery</label>
+        <select class="form-select" id="bc-send-mode" onchange="document.getElementById('bc-schedule-options').style.display=this.value==='schedule'?'block':'none'">
+          <option value="now">Send Now</option>
+          <option value="schedule">Schedule for Later</option>
+        </select>
+        <div id="bc-schedule-options" style="display:none;margin-top:10px">
+          <label class="form-label">Date and time (India Standard Time)</label>
+          <input class="form-input" type="datetime-local" id="bc-schedule-at"/>
+          <button class="btn btn-navy btn-sm" style="margin-top:8px" onclick="scheduleBroadcast()">📅 Schedule Broadcast</button>
+          <div style="font-size:11px;color:var(--muted);margin-top:5px">Campaign is saved on the server. Keep the bot running at scheduled time.</div>
+        </div>
+      </div>
+      <div class="form-group"><div class="broadcast-title">🕒 Scheduled Campaigns</div><button class="btn btn-navy btn-sm" onclick="loadScheduledBroadcasts()">Refresh schedules</button><div id="bc-schedules" style="font-size:12px;margin-top:8px"></div></div>
       <div id="bc-progress" style="display:none;margin-bottom:12px">
         <div style="font-size:12px;color:var(--muted);margin-bottom:4px" id="bc-progress-txt">Sending...</div>
         <div class="progress-bar"><div class="progress-fill" id="bc-progress-fill"></div></div>
@@ -1958,6 +1972,59 @@ async function saveAudience(){
     if(d.success){ bcLog('✅ Saved as '+d.name,'ok'); loadAudienceList(); }
     else bcLog('❌ Save failed','err');
   }catch(e){ bcLog('❌ '+e.message,'err'); }
+}
+
+
+async function scheduleBroadcast(){
+  if(!bcContacts.length){alert("Load an audience first");return;}
+  const tpl=document.getElementById("bc-tpl").value;
+  const at=document.getElementById("bc-schedule-at").value;
+  if(!tpl||!at){alert("Select template, date and time");return;}
+  // Interpret the datetime-local input in IST, independent of browser timezone.
+  const iso=at+":00+05:30";
+  const timestamp=Date.parse(iso);
+  if(!Number.isFinite(timestamp)||timestamp<=Date.now()+30000){alert("Choose a future date/time in IST");return;}
+  let cfg,payload;
+  try{
+    cfg=await emkayPrepareTemplateWithMedia(tpl,"__EMKAY_RECIPIENT_NAME__");
+    payload=emkayBuildTemplatePayload(tpl,bcContacts[0].phone,"__EMKAY_RECIPIENT_NAME__",cfg);
+  }catch(e){alert("Template configuration error: "+e.message);return;}
+  const count=bcContacts.length;
+  if(!confirm("Schedule "+count+" WhatsApp messages for "+new Date(timestamp).toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})+" IST?"))return;
+  try{
+    const response=await fetch("/admin/scheduled-broadcasts?token="+encodeURIComponent(new URLSearchParams(location.search).get("token")||decodeURIComponent(API_TOKEN)),{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({scheduledAt:new Date(timestamp).toISOString(),recipients:bcContacts.map(c=>({phone:c.phone,name:c.name})),templatePayload:payload,delayMs:Math.max(1000,Number(document.getElementById("bc-delay").value))})
+    });
+    const data=await response.json();
+    if(!response.ok)throw Error(data.error||"Scheduling failed");
+    alert("Scheduled successfully. Campaign ID: "+data.job.id);
+    await loadScheduledBroadcasts();
+  }catch(e){alert("Schedule failed: "+e.message);}
+}
+async function loadScheduledBroadcasts(){
+  const target=document.getElementById("bc-schedules");
+  try{
+    const response=await fetch("/admin/scheduled-broadcasts?token="+encodeURIComponent(new URLSearchParams(location.search).get("token")||decodeURIComponent(API_TOKEN)));
+    const data=await response.json();
+    if(!response.ok)throw Error(data.error||"Could not load schedules");
+    target.replaceChildren();
+    for(const j of data.jobs||[]){
+      const row=document.createElement("div");row.style.cssText="padding:8px 0;border-bottom:1px solid #ddd";
+      const when=new Date(j.scheduledAt).toLocaleString("en-IN",{timeZone:"Asia/Kolkata"});
+      row.append(document.createTextNode(j.template+" — "+when+" IST — "+j.status+" — "+j.sent+"/"+j.total+" sent"));
+      if(j.status==="scheduled"){
+        const btn=document.createElement("button");btn.className="btn btn-sm";btn.textContent="Cancel";btn.style.marginLeft="8px";
+        btn.onclick=async()=>{
+          if(!confirm("Cancel this scheduled campaign?"))return;
+          const res=await fetch("/admin/scheduled-broadcasts/"+encodeURIComponent(j.id)+"/cancel?token="+encodeURIComponent(new URLSearchParams(location.search).get("token")||decodeURIComponent(API_TOKEN)),{method:"POST"});
+          const result=await res.json();if(!res.ok)alert(result.error||"Cancel failed");await loadScheduledBroadcasts();
+        };row.append(btn);
+      }
+      target.append(row);
+    }
+    if(!(data.jobs||[]).length)target.textContent="No scheduled campaigns";
+  }catch(e){target.textContent="Unable to load schedules: "+e.message;}
 }
 
 async function startBroadcast(){

@@ -1,0 +1,36 @@
+node_modules/
+.env
+.env.*
+!.env.example
+
+# Customer and runtime data
+data/
+uploads/
+csv/
+logs/
+*.log
+*.sqlite
+*.sqlite3
+*.db
+
+# Credentials
+*credentials*.json
+*service-account*.json
+*secret*.json
+*token*.json
+
+# Backups
+*.bak
+*.bak.*
+*.backup
+*.backup.*
+*.before-*
+*.old
+*.zip
+*.tar
+*.tar.gz
+
+# Temporary files
+tmp/
+temp/
+.cache/

@@ -1,0 +1,2099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Emkay Trendz — Admin</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+:root{
+  --green:#25D366;--green-dark:#128C7E;--green-light:#DCF8C6;
+  --bg:#F0F2F5;--white:#fff;--border:#E9EDEF;
+  --text:#111B21;--muted:#667781;--blue:#027EB5;
+  --red:#dc3545;--gold:#c8973a;--navy:#0d1f3c;
+  --sidebar-w:380px;
+}
+body{background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
+
+/* ── TOP BAR ── */
+.topbar{
+  height:56px;background:var(--green-dark);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;position:fixed;top:0;left:0;right:0;z-index:100;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.topbar-brand{color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+.topbar-nav{display:flex;gap:4px}
+.nav-btn{
+  color:rgba(255,255,255,.8);background:none;border:none;
+  padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;
+  cursor:pointer;transition:all .15s;
+}
+.nav-btn:hover,.nav-btn.active{background:rgba(255,255,255,.15);color:#fff}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.status-pill{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(0,0,0,.2);border-radius:20px;padding:4px 12px;
+}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#4ade80}
+.status-dot.offline{background:#f87171}
+.status-txt{color:rgba(255,255,255,.8);font-size:12px}
+.logout-btn{
+  background:rgba(255,255,255,.15);border:none;color:#fff;
+  padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;
+}
+.logout-btn:hover{background:rgba(255,255,255,.25)}
+
+/* ── PAGES ── */
+.page{display:none;padding-top:56px;height:100vh}
+.page.active{display:flex;flex-direction:column}
+
+/* ── DASHBOARD ── */
+#page-dashboard{padding:56px 0 0;overflow-y:auto}
+.dash-body{padding:24px;max-width:1200px;margin:0 auto}
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:24px}
+.stat-card{
+  background:var(--white);border-radius:12px;padding:20px;
+  border-left:4px solid var(--green);box-shadow:0 1px 3px rgba(0,0,0,.08);
+}
+.stat-card:nth-child(2){border-color:#3b82f6}
+.stat-card:nth-child(3){border-color:#f59e0b}
+.stat-card:nth-child(4){border-color:#8b5cf6}
+.stat-card:nth-child(5){border-color:#ef4444}
+.stat-num{font-size:32px;font-weight:700;color:var(--navy);line-height:1}
+.stat-lbl{font-size:12px;color:var(--muted);margin-top:6px;text-transform:uppercase;letter-spacing:.5px}
+.dash-grid{display:grid;grid-template-columns:1fr 360px;gap:20px}
+.card{background:var(--white);border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);overflow:hidden}
+.card-head{
+  padding:14px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.card-title{font-size:14px;font-weight:600;color:var(--navy)}
+.activity-list{max-height:400px;overflow-y:auto}
+.activity-item{
+  padding:12px 18px;border-bottom:1px solid var(--border);
+  display:flex;gap:12px;align-items:center;cursor:pointer;
+  transition:background .1s;
+}
+.activity-item:hover{background:#f9fafb}
+.act-avatar{
+  width:38px;height:38px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:13px;flex-shrink:0;
+  background:#DCF8C6;color:#128C7E;
+}
+.act-body{flex:1;min-width:0}
+.act-name{font-size:13px;font-weight:600;margin-bottom:2px}
+.act-msg{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.act-time{font-size:11px;color:var(--muted);flex-shrink:0}
+.badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;
+}
+.badge-green{background:#DCF8C6;color:#128C7E}
+.badge-blue{background:#dbeafe;color:#1d4ed8}
+.badge-orange{background:#fef3c7;color:#92400e}
+.badge-red{background:#fee2e2;color:#991b1b}
+.badge-gray{background:#f3f4f6;color:#6b7280}
+.badge-dark{background:var(--navy);color:var(--gold)}
+
+/* Quick Send card */
+.qs-card{padding:16px}
+.form-label{font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:5px}
+.form-input,.form-select{
+  width:100%;padding:10px 12px;border:1.5px solid var(--border);
+  border-radius:8px;font-size:13px;outline:none;transition:border .2s;
+  background:#fff;color:var(--text);
+}
+.form-input:focus,.form-select:focus{border-color:var(--green)}
+.form-group{margin-bottom:12px}
+.btn{
+  padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;
+  cursor:pointer;border:none;transition:all .15s;
+}
+.btn-green{background:var(--green);color:#fff}
+.btn-green:hover{background:var(--green-dark)}
+.btn-navy{background:var(--navy);color:#fff}
+.btn-block{width:100%}
+.btn-sm{padding:6px 14px;font-size:12px}
+.result-msg{padding:8px 12px;border-radius:6px;font-size:12px;margin-top:8px;display:none}
+.result-ok{background:#DCF8C6;color:#128C7E}
+.result-err{background:#fee2e2;color:#991b1b}
+
+/* ── INBOX ── */
+#page-inbox{flex-direction:row;padding-top:56px;height:calc(100vh - 56px);overflow:hidden}
+.inbox-sidebar{
+  width:var(--sidebar-w);flex-shrink:0;
+  background:var(--white);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;height:calc(100vh - 56px);
+}
+.inbox-search{padding:10px 12px;border-bottom:1px solid var(--border)}
+.search-input{
+  width:100%;padding:8px 14px 8px 36px;border:none;border-radius:8px;
+  background:var(--bg);font-size:13px;outline:none;color:var(--text);
+}
+.search-wrap{position:relative}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px}
+.inbox-filters{
+  padding:8px 12px;border-bottom:1px solid var(--border);
+  display:flex;gap:6px;overflow-x:auto;
+}
+.inbox-filters::-webkit-scrollbar{display:none}
+.flt{
+  padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;
+  border:1.5px solid var(--border);background:var(--white);
+  cursor:pointer;color:var(--muted);white-space:nowrap;transition:all .15s;
+}
+.flt.active,.flt:hover{background:var(--green);color:#fff;border-color:var(--green)}
+.conv-list{flex:1;overflow-y:auto}
+.conv-item{
+  padding:12px 16px;border-bottom:1px solid var(--border);
+  display:flex;gap:12px;align-items:center;cursor:pointer;
+  transition:background .1s;position:relative;
+}
+.conv-item:hover,.conv-item.active{background:#f0f9f4}
+.conv-item.unread{background:#f7fdf9}
+.conv-avatar{
+  width:44px;height:44px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:15px;
+  background:var(--green-light);color:var(--green-dark);
+}
+.conv-info{flex:1;min-width:0}
+.conv-name{font-size:14px;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:6px}
+.conv-phone{font-size:11px;color:var(--muted)}
+.conv-preview{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.conv-right{text-align:right;flex-shrink:0}
+.conv-time{font-size:11px;color:var(--muted)}
+.unread-dot{
+  width:20px;height:20px;border-radius:50%;background:var(--green);
+  color:#fff;font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;margin-top:4px;margin-left:auto;
+}
+.handled-tag{
+  font-size:10px;background:#e8f5e9;color:#2e7d32;
+  padding:2px 6px;border-radius:4px;
+}
+
+/* ── CHAT PANEL ── */
+.chat-panel{flex:1;display:flex;flex-direction:column;min-height:0;
+  height:calc(100vh - 56px);background:#EBE5DD;
+  background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4c5b0' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.chat-empty{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;color:var(--muted);
+}
+.chat-empty-icon{font-size:64px;margin-bottom:16px;opacity:.5}
+.chat-header{
+  background:var(--white);padding:10px 16px;
+  display:flex;align-items:center;gap:12px;
+  border-bottom:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.05);
+}
+.chat-header-info{flex:1}
+.chat-header-name{font-size:15px;font-weight:600}
+.chat-header-sub{font-size:12px;color:var(--muted)}
+.chat-header-actions{display:flex;gap:8px}
+.icon-btn{
+  background:none;border:none;cursor:pointer;
+  padding:6px 10px;border-radius:6px;font-size:13px;
+  color:var(--muted);transition:all .15s;
+}
+.icon-btn:hover{background:var(--bg);color:var(--text)}
+.icon-btn.handled{background:#e8f5e9;color:#2e7d32}
+.chat-messages{
+  flex:1;overflow-y:auto;padding:16px;
+  display:flex;flex-direction:column;gap:4px;
+  min-height:0;max-height:calc(100vh - 350px);
+}
+.msg-row{display:flex;margin-bottom:2px}
+.msg-row.out{justify-content:flex-end}
+.msg-row.in{justify-content:flex-start}
+.bubble{
+  max-width:65%;padding:8px 12px;border-radius:8px;
+  font-size:13px;line-height:1.5;position:relative;
+  box-shadow:0 1px 2px rgba(0,0,0,.1);
+}
+.bubble.in{background:var(--white);border-top-left-radius:2px}
+.bubble.out{background:var(--green-light);border-top-right-radius:2px}
+.bubble-time{font-size:10px;color:var(--muted);text-align:right;margin-top:4px}
+.bubble-name{font-size:11px;color:var(--green-dark);font-weight:600;margin-bottom:2px}
+.date-divider{
+  text-align:center;margin:12px 0;
+}
+.date-divider span{
+  background:rgba(255,255,255,.8);color:var(--muted);
+  font-size:11px;padding:4px 12px;border-radius:8px;
+}
+
+/* ── REPLY BOX ── */
+.reply-box{
+  background:var(--white);padding:10px 12px;
+  border-top:1px solid var(--border);
+}
+.quick-replies{
+  display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;
+  margin-bottom:8px;border-bottom:1px solid var(--border);
+}
+.quick-replies::-webkit-scrollbar{display:none}
+.qr-btn{
+  white-space:nowrap;padding:5px 12px;border-radius:16px;
+  font-size:12px;border:1.5px solid var(--green);
+  color:var(--green-dark);background:#fff;cursor:pointer;
+  transition:all .15s;flex-shrink:0;
+}
+.qr-btn:hover{background:var(--green);color:#fff}
+.reply-input-row{display:flex;align-items:flex-end;gap:8px}
+.reply-textarea{
+  flex:1;padding:10px 14px;border:1.5px solid var(--border);
+  border-radius:20px;font-size:13px;outline:none;
+  resize:none;max-height:120px;line-height:1.4;
+  font-family:inherit;transition:border .2s;background:#f0f2f5;
+}
+.reply-textarea:focus{border-color:var(--green);background:#fff}
+.send-btn{
+  width:44px;height:44px;border-radius:50%;
+  background:var(--green);border:none;color:#fff;
+  font-size:18px;cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.send-btn:hover{background:var(--green-dark)}
+.attach-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:none;border:none;color:var(--muted);
+  font-size:18px;cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.attach-btn:hover{color:var(--green)}
+.reply-status{font-size:11px;padding:4px 8px;margin-top:4px;border-radius:4px;display:none}
+
+/* ── BROADCAST ── */
+#page-broadcast{overflow-y:auto;padding:56px 0 0}
+.broadcast-body{max-width:700px;margin:0 auto;padding:24px}
+.broadcast-card{background:var(--white);border-radius:12px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:16px}
+.broadcast-title{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin:10px 0}
+.progress-fill{height:100%;background:var(--green);border-radius:3px;width:0;transition:width .3s}
+.log-box{
+  background:#1e1e1e;border-radius:8px;padding:12px;
+  max-height:200px;overflow-y:auto;
+  font-family:'Courier New',monospace;font-size:11px;line-height:1.6;
+}
+.log-ok{color:#4ade80}.log-err{color:#f87171}.log-info{color:#60a5fa}
+.drop-zone{
+  border:2px dashed var(--border);border-radius:10px;
+  padding:32px;text-align:center;cursor:pointer;transition:all .2s;
+}
+.drop-zone:hover{border-color:var(--green);background:#f0fdf4}
+.contact-preview{max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;margin:10px 0;font-size:12px}
+.contact-row{padding:6px 12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between}
+.contact-row.hdr{background:var(--bg);font-weight:600;color:var(--muted)}
+
+/* ── LOGIN ── */
+#page-login{
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;background:var(--bg);padding-top:0!important;
+}
+.login-box{
+  background:var(--white);border-radius:16px;padding:40px;
+  width:100%;max-width:380px;box-shadow:0 4px 24px rgba(0,0,0,.1);
+  text-align:center;
+}
+.login-logo{font-size:48px;margin-bottom:8px}
+.login-title{font-size:22px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
+.login-input{
+  width:100%;padding:12px 16px;border:1.5px solid var(--border);
+  border-radius:8px;font-size:14px;outline:none;text-align:center;
+  margin-bottom:12px;transition:border .2s;
+}
+.login-input:focus{border-color:var(--green)}
+.login-btn{
+  width:100%;padding:13px;background:var(--green);color:#fff;
+  border:none;border-radius:8px;font-size:15px;font-weight:700;
+  cursor:pointer;transition:background .15s;
+}
+.login-btn:hover{background:var(--green-dark)}
+.login-err{color:#ef4444;font-size:13px;margin-top:8px;display:none}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .dash-grid{grid-template-columns:1fr}
+  #page-inbox{flex-direction:column}
+  .inbox-sidebar{width:100%;height:40vh}
+  .chat-panel{height:60vh}
+  .sidebar-w{width:100%}
+  .topbar-nav{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="page-login" class="page active">
+  <div class="login-box">
+    <div class="login-logo">🧵</div>
+    <div class="login-title">Emkay Trendz</div>
+    <div class="login-sub">WhatsApp Admin Panel</div>
+    <input class="login-input" type="password" id="loginPw" placeholder="Enter password"
+      onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="login-btn" onclick="doLogin()">Login →</button>
+    <div class="login-err" id="loginErr">Wrong password. Try again.</div>
+  </div>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar" id="topbar" style="display:none">
+  <div class="topbar-brand">🧵 Emkay Trendz Admin</div>
+  <div class="topbar-nav">
+    <button class="nav-btn active" onclick="showPage('dashboard',this)">📊 Dashboard</button>
+    <button class="nav-btn" onclick="showPage('inbox',this)">💬 Inbox <span id="nav-unread"></span></button>
+    <button class="nav-btn" onclick="showPage('broadcast',this)">📤 Broadcast</button>
+  </div>
+  <div class="topbar-right">
+    <div class="status-pill">
+      <div class="status-dot" id="statusDot"></div>
+      <span class="status-txt" id="statusTxt">Connecting...</span>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">🔒 Logout</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="page-dashboard" class="page" style="display:none">
+  <div class="dash-body">
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" id="s-total">0</div><div class="stat-lbl">Total Messages</div></div>
+      <div class="stat-card"><div class="stat-num" id="s-price">0</div><div class="stat-lbl">Price Requests</div></div>
+      <div class="stat-card"><div class="stat-num" id="s-users">0</div><div class="stat-lbl">Unique Contacts</div></div>
+      <div class="stat-card"><div class="stat-num" id="s-replies">0</div><div class="stat-lbl">Replies Received</div></div>
+      <div class="stat-card"><div class="stat-num" id="s-today">0</div><div class="stat-lbl">Today</div></div>
+    </div>
+    <div class="dash-grid">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">📨 Recent Activity</div>
+          <span class="badge badge-dark" id="feed-count">0</span>
+        </div>
+        <div class="activity-list" id="feedList">
+          <div style="padding:40px;text-align:center;color:var(--muted)">Loading...</div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-head"><div class="card-title">⚡ Quick Send</div></div>
+          <div class="qs-card">
+            <div class="form-group">
+              <label class="form-label">Template</label>
+              <select class="form-select" id="qs-tpl"><option value="">Loading...</option></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone Number</label>
+              <input class="form-input" id="qs-phone" placeholder="91XXXXXXXXXX"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Customer Name</label>
+              <input class="form-input" id="qs-name" placeholder="Valued Customer"/>
+            </div>
+            <button class="btn btn-green btn-block" onclick="quickSend()">Send Message →</button>
+            <div class="result-msg" id="qs-result"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">💰 Price Requests</div><span class="badge badge-green" id="pr-count">0</span></div>
+          <div id="priceList" style="max-height:180px;overflow-y:auto">
+            <div style="padding:20px;text-align:center;color:var(--muted)">None yet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INBOX -->
+<div id="page-inbox" class="page" style="display:none">
+  <div class="inbox-sidebar">
+    <div class="inbox-search">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" id="searchInput" placeholder="Search contacts..." oninput="filterConvs()"/>
+      </div>
+    </div>
+    <div class="inbox-filters">
+      <button class="flt active" onclick="setFilter('all',this)">All</button>
+      <button class="flt" onclick="setFilter('reply',this)">💬 Replied</button>
+      <button class="flt" onclick="setFilter('price',this)">💰 Price</button>
+      <button class="flt" onclick="setFilter('unhandled',this)">🔴 Pending</button>
+      <button class="flt" onclick="setFilter('handled',this)">✅ Handled</button>
+    </div>
+    <div class="conv-list" id="convList">
+      <div style="padding:40px;text-align:center;color:var(--muted)">Loading conversations...</div>
+    </div>
+  </div>
+  <div class="chat-panel" id="chatPanel">
+    <div class="chat-empty" id="chatEmpty">
+      <div class="chat-empty-icon">💬</div>
+      <div style="font-size:16px;font-weight:600;margin-bottom:8px">Select a conversation</div>
+      <div style="font-size:13px">Choose from the left to start chatting</div>
+    </div>
+    <div id="chatView" style="display:none;flex-direction:column;height:100%">
+      <div class="chat-header">
+        <div class="conv-avatar" id="chatAvatar">?</div>
+        <div class="chat-header-info">
+          <div class="chat-header-name" id="chatName">—</div>
+          <div class="chat-header-sub" id="chatSub">—</div>
+        </div>
+        <div class="chat-header-actions">
+          <button class="icon-btn" id="handleBtn" onclick="toggleHandled()">✅ Mark Handled</button>
+          <button class="icon-btn" onclick="window.open('https://wa.me/'+currentPhone)">📞 WhatsApp</button>
+        </div>
+      </div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div id="replyExpired" style="display:none;background:#fff8e1;padding:16px;border-top:1px solid #ffe082;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <span style="font-size:20px">⏰</span>
+          <div style="font-size:13px;font-weight:600;color:#e65100">24-Hour Window Expired — Send a template to restart</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="expiredTplSelect" class="form-select" style="flex:1">
+            <option value="">Select template to send...</option>
+          </select>
+          <button onclick="sendExpiredTemplate()" style="padding:10px 20px;background:#25D366;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">📋 Send</button>
+        </div>
+        <div id="expiredTplResult" style="font-size:12px;margin-top:6px;display:none"></div>
+      </div>
+      <div id="replyBoxWrap" style="background:#fff;border-top:1px solid #E9EDEF;padding:8px 12px;">
+        <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid #f0f2f5">
+          <button class="qr-btn" onclick="setMsg('Thank you for your interest! Our team will contact you shortly.')">👋 Thank you</button>
+            <button class="qr-btn" onclick="setMsg(`Thank you for your requirement. 🙏
+
+Kindly share your visiting card/contact details with us, so our team can connect with you regarding your requirement.
+
+Thank you.
+EMKAY TRENDZ`)">📇 Share Details</button>
+            <button class="qr-btn" onclick="setMsg(`Thank you for your response. 🙏
+
+For fabric details, samples, pricing & orders, kindly connect with our sales team:
+
+📞 Natwar Prajapati: +91 93280 62066
+📞 Rangaram Dewasi: +91 91044 93036
+
+Our team will assist you further.
+
+EMKAY TRENDZ
+Wholesale & Bulk Enquiries Welcome.`)">🤝 Sales Team</button>
+          <button class="qr-btn" onclick="setMsg('We will call you back shortly.')">📞 Call back</button>
+          <button class="qr-btn" onclick="setMsg('Please share your full address for delivery.')">📍 Address</button>
+          <button class="qr-btn" onclick="setMsg('Our sales team will get in touch with you soon.')">✅ Follow up</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+          <select id="inlineTplSelect" style="flex:1;padding:7px 12px;border:1.5px solid #E9EDEF;border-radius:20px;font-size:12px;background:#f0f2f5;outline:none">
+            <option value="">📋 Send a template...</option>
+          </select>
+          <button onclick="sendInlineTemplate()" style="padding:7px 16px;background:#128C7E;color:#fff;border:none;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer">Send</button>
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:8px">
+          <label style="color:#667781;font-size:20px;cursor:pointer;padding:4px" onclick="document.getElementById('imgInput').click()">📎</label>
+          <input type="file" id="imgInput" accept="image/*,video/*,audio/*,.pdf,.txt,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.webp" multiple style="display:none" onchange="previewImages(this)"/>
+          <textarea class="reply-textarea" id="replyText" rows="1" placeholder="Type a message..."
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendReply()}"
+            oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
+          <button class="send-btn" onclick="sendReply()">➤</button>
+        </div>
+        <div class="reply-status" id="replyStatus"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BROADCAST -->
+<div id="page-broadcast" class="page" style="display:none">
+  <div class="broadcast-body">
+    <div class="broadcast-card">
+      <div class="broadcast-title">📤 Send Broadcast</div>
+      <div class="form-group">
+        <label class="form-label">Select Template</label>
+        <select class="form-select" id="bc-tpl" onchange="updateTplInfo()">
+          <option value="">Loading templates...</option>
+        </select>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px" id="bc-tpl-info"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Audience</label>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <select class="form-select" id="bc-audience" style="flex:1"><option value="">-- Saved audiences --</option></select>
+          <button class="btn btn-navy btn-sm" onclick="loadAudience()">Load</button>
+        </div>
+        <div class="drop-zone" onclick="document.getElementById('bcFile').click()">
+          <div style="font-size:24px;margin-bottom:8px">📊</div>
+          <div style="font-size:13px;color:var(--muted)">Click to upload CSV</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">Format: phone,name — one per row</div>
+        </div>
+        <input type="file" id="bcFile" accept=".csv,.xlsx,.xls" style="display:none" onchange="parseCSV(this)"/>
+        <div id="bcPreview" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0">
+            <span style="font-size:13px;font-weight:600" id="bcInfo">0 contacts</span>
+            <button class="btn btn-sm" style="background:#fee2e2;color:#991b1b;border:none" onclick="clearCSV()">✕ Clear</button>
+          </div>
+          <div class="contact-preview">
+            <div class="contact-row hdr"><span>Phone</span><span>Name</span><span>Status</span></div>
+            <div id="bcRows"></div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Save Audience As</label>
+        <div style="display:flex;gap:8px">
+          <input class="form-input" id="bc-save-name" placeholder="e.g. agents_aug_2026" style="flex:1"/>
+          <button class="btn btn-navy btn-sm" onclick="saveAudience()">Save</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Delay Between Messages</label>
+        <select class="form-select" id="bc-delay">
+          <option value="500">0.5 seconds (fast)</option>
+          <option value="1000" selected>1 second (recommended)</option>
+          <option value="2000">2 seconds (safe)</option>
+        </select>
+      </div>
+      <div id="bc-progress" style="display:none;margin-bottom:12px">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:4px" id="bc-progress-txt">Sending...</div>
+        <div class="progress-bar"><div class="progress-fill" id="bc-progress-fill"></div></div>
+        <div style="display:flex;gap:16px;font-size:12px;margin-top:4px">
+          <span>✅ <span id="bc-ok">0</span></span>
+          <span>❌ <span id="bc-err">0</span></span>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-green" id="bc-start" onclick="startBroadcast()" disabled>🚀 Start Broadcast</button>
+        <button class="btn" style="background:#fee2e2;color:#991b1b;display:none" id="bc-stop" onclick="stopBC=true">⏹ Stop</button>
+      </div>
+      <div class="result-msg" id="bc-result"></div>
+    </div>
+    <div class="broadcast-card">
+      <div class="broadcast-title">📋 Send Log</div>
+      <div class="log-box" id="bcLog"><div class="log-info">Ready to send...</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TOKEN='EAAu8qDLKSIQBR9HoTZCGe4Vos6PjtWlFHHogC7NLVOXGSkfydG4pcZBCyn8pOVbZBvjJ1TB4C1WmvYdDccZBu0pPQ602uhOvvCK06yqibwC1IPsCZBFO8ZC15V4SCqQ5vj6UZABWztA8Xro4Eoj2D0bNA3K0s90F7mXiZBIxXymXJPixZA5KObtASQZAnL5UZAK6OaEYQZDZD';
+const PHONE_ID='1082548208284300',WABA_ID='1496462321888059';
+const DEFAULT_MTEXT_MEDIA_ID='27935561162752675';
+const MEDIA_IDS={'emkay_corduroy_print_146':'1065919672929228','emkay_corduroy_207':'27458669057152182','emkay_corduroy_print':'27458669057152182','autograph01432':'868537249448142','mtexclakoni01':'27935561162752675'};
+
+function getTemplateMediaId(tpl, tplObj){
+  if(MEDIA_IDS[tpl]) return MEDIA_IDS[tpl];
+
+  if(/^mtex/i.test(tpl)){
+    return DEFAULT_MTEXT_MEDIA_ID;
+  }
+
+  return null;
+}
+
+/* Universal approved-template payload builder. Never infer header format from name. */
+const EMKAY_TEMPLATE_SETTINGS = 'emkay_template_settings_v1';
+function emkaySettings(){try{return JSON.parse(localStorage.getItem(EMKAY_TEMPLATE_SETTINGS)||'{}')}catch(_){return {}}}
+function emkaySaveSettings(v){localStorage.setItem(EMKAY_TEMPLATE_SETTINGS,JSON.stringify(v))}
+function emkayParamCount(text){
+  const n=[...String(text||'').matchAll(/\{\{(\d+)\}\}/g)].map(m=>Number(m[1]));
+  if(!n.length)return 0;
+  const max=Math.max(...n);
+  if(max>30||n.some(x=>x<1))throw Error('Unsupported template variable numbering');
+  for(let i=1;i<=max;i++)if(!n.includes(i))throw Error('Template variables must be consecutive: missing {{'+i+'}}');
+  return max;
+}
+function emkayAsk(label,defaultValue){
+  const v=prompt(label,defaultValue||'');
+  if(v===null)throw Error('Template configuration cancelled');
+  if(!v.trim())throw Error('Required template value missing: '+label);
+  return v.trim();
+}
+function emkayBuildTemplatePayload(tpl,to,recipientName,settings){
+  const t=allTemplates.find(x=>x.name===tpl);
+  if(!t||t.status!=='APPROVED')throw Error('Approved template not loaded: '+tpl+'. Refresh templates.');
+  const cfg=settings||{};
+  const components=[];
+  for(const comp of t.components||[]){
+    const type=String(comp.type||'').toUpperCase();
+    if(type==='HEADER'){
+      const fmt=String(comp.format||'TEXT').toUpperCase();
+      if(['IMAGE','VIDEO','DOCUMENT'].includes(fmt)){
+        const media=cfg.media;
+        if(!media||!media.value)throw Error(fmt+' header needs a configured media ID or HTTPS link');
+        if(media.format!==fmt)throw Error('Media configured as '+media.format+' but Meta requires '+fmt);
+        const item={};item[fmt.toLowerCase()]={};
+        item[fmt.toLowerCase()][media.kind]=media.value;
+        if(fmt==='DOCUMENT'&&cfg.filename)item.document.filename=cfg.filename;
+        components.push({type:'header',parameters:[{type:fmt.toLowerCase(),...item}]});
+      }else if(fmt==='TEXT'){
+        const count=emkayParamCount(comp.text);
+        if(count)components.push({type:'header',parameters:Array.from({length:count},(_,i)=>({type:'text',text:String((cfg.header||[])[i]||'')}))});
+      }else if(fmt!=='NONE')throw Error('Unsupported header format: '+fmt);
+    }else if(type==='BODY'){
+      const count=emkayParamCount(comp.text);
+      if(count){
+        const params=Array.from({length:count},(_,i)=>({type:'text',text:String(i===0&&cfg.useRecipientName?recipientName||'Valued Customer':(cfg.body||[])[i]||'')}));
+        if(params.some(x=>!x.text.trim()))throw Error('Missing body variables for '+tpl);
+        components.push({type:'body',parameters:params});
+      }
+    }else if(type==='BUTTONS'){
+      (comp.buttons||[]).forEach((b,i)=>{
+        const bt=String(b.type||'').toUpperCase();
+        if(bt==='URL'&&emkayParamCount(b.url)){
+          const val=(cfg.buttons||{})[i];
+          if(!val)throw Error('Missing URL button parameter '+(i+1));
+          components.push({type:'button',sub_type:'url',index:String(i),parameters:[{type:'text',text:String(val)}]});
+        }else if(bt==='COPY_CODE'){
+          const val=(cfg.buttons||{})[i];
+          if(!val)throw Error('Missing coupon code for button '+(i+1));
+          components.push({type:'button',sub_type:'copy_code',index:String(i),parameters:[{type:'coupon_code',coupon_code:String(val)}]});
+        }else if(!['QUICK_REPLY','URL','PHONE_NUMBER'].includes(bt)){
+          throw Error('Unsupported button type '+bt+'; refusing to send mismatched parameters');
+        }
+      });
+    }else if(!['FOOTER'].includes(type))throw Error('Unsupported component type: '+type);
+  }
+  const payload={messaging_product:'whatsapp',to:String(to),type:'template',template:{name:tpl,language:{code:t.language||'en'}}};
+  if(components.length)payload.template.components=components;
+  return payload;
+}
+function emkayConfigureTemplate(tpl,recipientName){
+  const t=allTemplates.find(x=>x.name===tpl);
+  if(!t)throw Error('Template not loaded: '+tpl);
+  const all=emkaySettings();const cfg=structuredClone(all[tpl]||{});
+  for(const comp of t.components||[]){
+    const type=String(comp.type||'').toUpperCase();
+    if(type==='HEADER'){
+      const fmt=String(comp.format||'TEXT').toUpperCase();
+      if(['IMAGE','DOCUMENT','VIDEO'].includes(fmt)){
+        const known=typeof MEDIA_IDS!=='undefined'?MEDIA_IDS[tpl]:null;
+        const suggested=cfg.media?.value||known||'';
+        if(!cfg.media?.value||cfg.media.format!==fmt){
+          const value=emkayAsk(tpl+' ('+fmt+'): enter Meta media ID or HTTPS media URL',suggested);
+          const kind=/^https:\/\//i.test(value)?'link':'id';
+          cfg.media={format:fmt,kind,value};
+        }
+        if(fmt==='DOCUMENT'&&!cfg.filename)cfg.filename=tpl+'.pdf';
+      }else if(fmt==='TEXT'){
+        const count=emkayParamCount(comp.text);cfg.header=cfg.header||[];
+        for(let i=0;i<count;i++)cfg.header[i]=emkayAsk('Header variable {{'+(i+1)+'}}',cfg.header[i]);
+      }
+    }else if(type==='BODY'){
+      const count=emkayParamCount(comp.text);cfg.body=cfg.body||[];
+      if(count===1&&!cfg.body[0]&&cfg.useRecipientName===undefined)cfg.useRecipientName=confirm('Use each customer name for body {{1}}? OK = yes; Cancel = fixed text');
+      for(let i=0;i<count;i++){
+        if(i===0&&cfg.useRecipientName)continue;
+        cfg.body[i]=emkayAsk('Body variable {{'+(i+1)+'}}',cfg.body[i]);
+      }
+    }else if(type==='BUTTONS'){
+      cfg.buttons=cfg.buttons||{};
+      (comp.buttons||[]).forEach((b,i)=>{
+        if((b.type==='URL'&&emkayParamCount(b.url))||b.type==='COPY_CODE')cfg.buttons[i]=emkayAsk('Dynamic button '+(i+1)+' value',cfg.buttons[i]);
+      });
+    }
+  }
+  emkayBuildTemplatePayload(tpl,'0000000000',recipientName||'Valued Customer',cfg);
+  all[tpl]=cfg;emkaySaveSettings(all);
+  return cfg;
+}
+async function emkayAutoTemplateMedia(tpl){
+  const t=allTemplates.find(x=>x.name===tpl);
+  const h=(t?.components||[]).find(c=>c.type==='HEADER');
+  const format=String(h?.format||'').toUpperCase();
+  if(!['DOCUMENT','IMAGE','VIDEO'].includes(format))return;
+  const r=await fetch('/admin/template-media/resolve?token='+encodeURIComponent(decodeURIComponent(API_TOKEN)),{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({name:tpl,language:t.language||'en'})
+  });
+  const data=await r.json();
+  if(!r.ok||!data.id)throw Error(data.error||'Automatic media retrieval failed');
+  const all=emkaySettings(),cfg=all[tpl]||{};
+  cfg.media={format,kind:'id',value:String(data.id)};
+  if(format==='DOCUMENT')cfg.filename=data.filename||tpl+'.pdf';
+  all[tpl]=cfg;emkaySaveSettings(all);
+}
+async function emkayPrepareTemplateWithMedia(tpl,recipientName){
+  const t=allTemplates.find(x=>x.name===tpl);
+  const header=(t?.components||[]).find(c=>c.type==='HEADER');
+  if(['DOCUMENT','IMAGE','VIDEO'].includes(header?.format)){
+    try{await emkayAutoTemplateMedia(tpl)}catch(e){
+      console.warn('[TEMPLATE MEDIA] Automatic retrieval unavailable:',e.message);
+      const existing=emkaySettings()[tpl]?.media;
+      if(!existing)throw Error('Automatic Meta media retrieval failed: '+e.message);
+    }
+  }
+  return emkayPrepareTemplate(tpl,recipientName);
+}
+function emkayPrepareTemplate(tpl,recipientName){
+  const cfg=emkaySettings()[tpl];
+  if(cfg){try{emkayBuildTemplatePayload(tpl,'0000000000',recipientName||'Valued Customer',cfg);return cfg}catch(e){console.warn('Reconfigure template:',e.message)}}
+  return emkayConfigureTemplate(tpl,recipientName);
+}
+async function emkayPostTemplate(payload){
+  const r=await fetch('https://graph.facebook.com/v19.0/'+PHONE_ID+'/messages',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify(payload)});
+  const d=await r.json();
+  if(!r.ok||!d.messages?.length)throw Error(d.error?.message||'WhatsApp send failed');
+  return d;
+}
+/* To change a saved media ID/variable: run emkayConfigureTemplate('template_name') in browser console. */
+
+const TEMPLATE_IMAGE_URLS = {};
+const API_TOKEN='EmkayTrendz%402026';
+const QUICK_REPLIES_PRESET=[
+  'Thank you for your interest! Our team will contact you shortly.',
+  'We will call you back shortly.',
+  'Please share your full address for delivery.',
+  'Minimum order is 50 meters per colour. Price is ₹165/meter for AUTOGRAPH–1432.',
+  'Our sales team will get in touch with you soon.'
+];
+
+let allMsgs=[],contactNames={},handledPhones=new Set(JSON.parse(localStorage.getItem('handled')||'[]'));
+let currentPhone=null,sentMessages={},convFilter='all',searchQuery='';
+let lastMsgCount=0,unreadCount=0,bcContacts=[],stopBC=false;
+let allTemplates=[];
+
+// ── AUTH ──
+window.addEventListener("load", checkSession);
+function doLogin(){
+  const pw=document.getElementById('loginPw').value;
+  fetch('/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})})
+  .then(r=>r.json()).then(d=>{
+    if(d.ok){
+      // Save session for 48 hours
+      localStorage.setItem('emkay_session', JSON.stringify({pw, expires: Date.now() + 48*60*60*1000}));
+      showAdmin();
+    } else {
+      document.getElementById('loginErr').style.display='block';
+    }
+  }).catch(()=>{ document.getElementById('loginErr').style.display='block'; });
+}
+
+function showAdmin(){
+  document.getElementById('page-login').style.display='none';
+  document.getElementById('topbar').style.display='flex';
+  showPage('dashboard');
+  init();
+}
+
+function checkSession(){
+  const s = localStorage.getItem('emkay_session');
+  if(s){
+    try{
+      const {pw, expires} = JSON.parse(s);
+      if(Date.now() < expires){
+        showAdmin();
+        return;
+      }
+    }catch(e){}
+    localStorage.removeItem('emkay_session');
+  }
+}
+
+function doLogout(){
+  if(confirm('Logout?')){
+    localStorage.removeItem('emkay_session');
+    document.getElementById('topbar').style.display='none';
+    document.querySelectorAll('.page').forEach(p=>p.style.display='none');
+    document.getElementById('page-login').style.display='flex';
+    document.getElementById('loginPw').value='';
+  }
+}
+
+// ── NAVIGATION ──
+function showPage(id, btn){
+  // Hide all pages except login
+  ['dashboard','inbox','broadcast'].forEach(p=>{
+    const el=document.getElementById('page-'+p);
+    if(el) el.style.display='none';
+  });
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  // Show target page
+  const page=document.getElementById('page-'+id);
+  if(page){
+    if(id==='inbox'){
+      page.style.display='flex';
+      page.style.flexDirection='row';
+      page.style.height='calc(100vh - 56px)';
+    } else {
+      page.style.display='block';
+      page.style.overflowY='auto';
+    }
+  }
+  if(btn) btn.classList.add('active');
+  else {
+    document.querySelectorAll('.nav-btn').forEach(b=>{
+      if(b.textContent.toLowerCase().includes(id)) b.classList.add('active');
+    });
+  }
+  if(id==='inbox') unreadCount=0, updateUnreadBadge();
+}
+
+function updateUnreadBadge(){
+  const el=document.getElementById('nav-unread');
+  if(el) el.textContent = unreadCount>0 ? '('+unreadCount+')' : '';
+}
+
+// ── INIT ──
+async function init(){
+  await Promise.all([fetchMsgs(), fetchContacts(), loadTemplates(), loadSentMessages(), loadAudienceList()]);
+  setInterval(fetchMsgs, 5000);
+  setInterval(loadSentMessages, 15000);
+  if(Notification.permission==='default') Notification.requestPermission();
+}
+
+// ── DATA FETCH ──
+async function fetchMsgs(){
+  try{
+    const r=await fetch('/admin/logs?token='+API_TOKEN);
+    if(!r.ok) throw new Error('offline');
+    const d=await r.json();
+    if(d.messages){
+      const newCount=d.messages.length;
+      if(lastMsgCount>0 && newCount>lastMsgCount){
+        const diff=newCount-lastMsgCount;
+        unreadCount+=diff;
+        updateUnreadBadge();
+        try{ new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAAABkYXRhSAYAAAAA').play(); }catch(e){}
+        if(Notification.permission==='granted'){
+          new Notification('Emkay — '+diff+' new message'+(diff>1?'s':''),{body:d.messages[0].text||'New message'});
+        }
+      }
+      lastMsgCount=newCount;
+      allMsgs=d.messages;
+      updateDashboard();
+      renderConvList();
+      if(currentPhone) renderChat(currentPhone);
+    }
+    document.getElementById('statusDot').className='status-dot';
+    document.getElementById('statusTxt').textContent='Bot Online';
+  }catch(e){
+    document.getElementById('statusDot').className='status-dot offline';
+    document.getElementById('statusTxt').textContent='Offline';
+  }
+}
+
+
+function normalizePhoneNumber(phone){
+  return String(phone || '').replace(/\D/g,'');
+}
+
+function getContactDisplayName(phone, fallback=null){
+  const p=normalizePhoneNumber(phone);
+
+  if(!p) return fallback || '';
+
+  // Exact match first
+  if(contactNames[p]) return contactNames[p];
+  if(contactNames['+'+p]) return contactNames['+'+p];
+
+  // Handle 91XXXXXXXXXX vs XXXXXXXXXX
+  if(p.startsWith('91') && p.length===12){
+    const local=p.substring(2);
+    if(contactNames[local]) return contactNames[local];
+    if(contactNames['+'+local]) return contactNames['+'+local];
+  }
+
+  // Last-resort normalized comparison
+  for(const key of Object.keys(contactNames || {})){
+    if(normalizePhoneNumber(key)===p){
+      return contactNames[key];
+    }
+  }
+
+  return fallback || null;
+}
+
+async function fetchContacts(){
+  try{
+    const r=await fetch('/admin/contacts?token='+API_TOKEN);
+    const d=await r.json();
+    contactNames=d.contacts||{};
+  }catch(e){}
+}
+
+async function loadSentMessages(){
+  try{
+    const r=await fetch('/admin/replies?token='+API_TOKEN);
+    const d=await r.json();
+    (d.replies||[]).forEach(m=>{
+      if(!m.phone) return;
+      if(!sentMessages[m.phone]) sentMessages[m.phone]=[];
+      if(!sentMessages[m.phone].some(s=>s.ts===m.ts)){
+        sentMessages[m.phone].push({text:m.text,ts:m.ts,isSent:m.type==='sent',msgType:m.msgType});
+      }
+    });
+    if(currentPhone) renderChat(currentPhone);
+  }catch(e){}
+}
+
+async function loadTemplates(){
+  try{
+    let url='https://graph.facebook.com/v19.0/'+WABA_ID+'/message_templates?fields=name,status,language,components&limit=100';
+    const found=[];
+    while(url){
+      const r=await fetch(url,{headers:{Authorization:'Bearer '+TOKEN}});
+      const d=await r.json();
+      if(!r.ok)throw Error(d.error?.message||'Cannot load templates');
+      found.push(...(d.data||[]));url=d.paging?.next||null;
+    }
+    allTemplates=found.filter(t=>t.status==='APPROVED');
+    // Populate QS dropdown
+    const qsSel=document.getElementById('qs-tpl');
+    const bcSel=document.getElementById('bc-tpl');
+    const opts=allTemplates.map(t=>'<option value="'+t.name+'">'+t.name.replace(/_/g,' ').toUpperCase()+'</option>').join('');
+    if(qsSel) qsSel.innerHTML=opts||'<option>No templates</option>';
+    if(bcSel) bcSel.innerHTML=opts||'<option>No templates</option>';
+    const expSel=document.getElementById('expiredTplSelect');
+    if(expSel) expSel.innerHTML='<option value="">Select template to send...</option>'+(opts||'');
+    const inlineSel=document.getElementById('inlineTplSelect');
+    if(inlineSel) inlineSel.innerHTML='<option value="">📋 Send a template...</option>'+(opts||'');
+  }catch(e){}
+}
+
+async function loadAudienceList(){
+  try{
+    const r=await fetch('/admin/list-csv?token='+API_TOKEN);
+    const d=await r.json();
+    const sel=document.getElementById('bc-audience');
+    if(sel) sel.innerHTML='<option value="">-- Saved audiences --</option>'+(d.files||[]).map(f=>'<option value="'+f+'">'+f.replace('.csv','')+'</option>').join('');
+  }catch(e){}
+}
+
+// ── DASHBOARD ──
+function updateDashboard(){
+  const today=Math.floor(Date.now()/1000)-86400;
+  document.getElementById('s-total').textContent=allMsgs.length;
+  document.getElementById('s-price').textContent=allMsgs.filter(m=>m.type==='price').length;
+  document.getElementById('s-users').textContent=new Set(allMsgs.map(m=>m.phone)).size;
+  const replies=Object.values(sentMessages).flat().filter(m=>!m.isSent).length;
+  document.getElementById('s-replies').textContent=replies;
+  document.getElementById('s-today').textContent=allMsgs.filter(m=>m.ts>today).length;
+  document.getElementById('feed-count').textContent=allMsgs.length;
+
+  const fl=document.getElementById('feedList');
+  if(allMsgs.length){
+    fl.innerHTML=allMsgs.slice(0,50).map(m=>{
+      const name=getContactDisplayName(m.phone)||'+'+m.phone;
+      return '<div class="activity-item" style="cursor:pointer" onclick="showPage(\'inbox\');setTimeout(function(){openChat(\''+m.phone+'\')},300)">'
+        +'<div class="act-avatar">'+name[0]+'</div>'
+        +'<div class="act-body"><div class="act-name">'+name+'</div>'
+        +'<div class="act-msg">'+(m.text||m.intId||'—')+'</div></div>'
+        +'<div class="act-time">'+timeAgo(m.ts)+'</div></div>';
+    }).join('');
+  } else {
+    fl.innerHTML='<div style="padding:40px;text-align:center;color:var(--muted)">No messages yet</div>';
+  }
+
+  const prices=allMsgs.filter(m=>m.type==='price');
+  document.getElementById('pr-count').textContent=prices.length;
+  const pl=document.getElementById('priceList');
+  pl.innerHTML=prices.length?prices.map(m=>'<div class="contact-row"><span>'+( getContactDisplayName(m.phone)||'+'+m.phone)+'</span><span style="color:var(--muted)">'+timeAgo(m.ts)+'</span></div>').join(''):'<div style="padding:20px;text-align:center;color:var(--muted)">None yet</div>';
+}
+
+// ── CONVERSATIONS ──
+function renderConvList(){
+  const byPhone={};
+  allMsgs.forEach(m=>{ if(!byPhone[m.phone])byPhone[m.phone]=[]; byPhone[m.phone].push(m); });
+  let phones=Object.keys(byPhone);
+
+  // Apply filter
+  if(convFilter==='reply') phones=phones.filter(p=>(sentMessages[p]||[]).some(m=>!m.isSent));
+  else if(convFilter==='price') phones=phones.filter(p=>byPhone[p].some(m=>m.type==='price'));
+  else if(convFilter==='handled') phones=phones.filter(p=>handledPhones.has(p));
+  else if(convFilter==='unhandled') phones=phones.filter(p=>!handledPhones.has(p));
+
+  // Apply search
+  if(searchQuery){
+    phones=phones.filter(p=>{
+      const name=(getContactDisplayName(p)||'').toLowerCase();
+      return name.includes(searchQuery)||p.includes(searchQuery);
+    });
+  }
+
+  const cl=document.getElementById('convList');
+  if(!phones.length){
+    cl.innerHTML='<div style="padding:40px;text-align:center;color:var(--muted)">No conversations found</div>';
+    return;
+  }
+
+  cl.innerHTML=phones.map(phone=>{
+    const msgs=byPhone[phone];
+
+    const last=msgs[0];
+
+    /*
+     * Name priority:
+     * 1. contactNames / normalized WhatsApp name
+     * 2. name stored on any incoming message
+     * 3. name stored on sent message
+     * 4. phone number
+     */
+    let name=getContactDisplayName(phone)||null;
+
+    if(!name){
+      for(const m of msgs){
+        if(m.name && String(m.name).trim()){
+          name=String(m.name).trim();
+          break;
+        }
+      }
+    }
+
+    if(!name){
+      const sent=sentMessages[phone]||[];
+
+      for(const m of sent){
+        if(m.name && String(m.name).trim()){
+          name=String(m.name).trim();
+          break;
+        }
+      }
+    }
+
+    const displayName=name||'+'+phone;
+
+    const initials=
+      name
+        ? String(name).trim().charAt(0).toUpperCase()
+        : phone.slice(-2);
+
+    const hasPrice=msgs.some(m=>m.type==='price');
+    const isHandled=handledPhones.has(phone);
+    const hasSent=(sentMessages[phone]||[]).some(m=>m.isSent);
+    const isActive=currentPhone===phone;
+
+    return '<div class="conv-item'+
+      (isActive?' active':'')+
+      (isHandled?' handled':'')+
+      '" onclick="openChat(\''+phone+'\')">'+
+
+      '<div class="conv-avatar">'+
+        escapeHtml(initials)+
+      '</div>'+
+
+      '<div class="conv-info">'+
+
+        '<div class="conv-name">'+
+          escapeHtml(displayName)+
+          (hasPrice?' 💰':'')+
+          (hasSent?' ↩':'')+
+        '</div>'+
+
+        '<div class="conv-phone">+'+
+          escapeHtml(phone)+
+        '</div>'+
+
+        '<div class="conv-preview">'+
+          escapeHtml(last.text||last.intId||'—')+
+        '</div>'+
+
+      '</div>'+
+
+      '<div class="conv-right">'+
+        '<div class="conv-time">'+
+          timeAgo(last.ts)+
+        '</div>'+
+
+        (isHandled?
+          '<div class="handled-tag">✅ Done</div>':
+          '')+
+
+      '</div>'+
+
+    '</div>';
+  }).join('');
+}
+
+function setFilter(f, btn){
+  convFilter=f;
+  document.querySelectorAll('.flt').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderConvList();
+}
+
+function filterConvs(){
+  searchQuery=document.getElementById('searchInput').value.toLowerCase();
+  renderConvList();
+}
+
+// ── CHAT ──
+function openChat(phone){
+  currentPhone=phone;
+  const name=getContactDisplayName(phone)||null;
+  const initials=name?name[0].toUpperCase():phone.slice(-2);
+  document.getElementById('chatAvatar').textContent=initials;
+  document.getElementById('chatName').textContent=getContactDisplayName(phone)||name||'+'+phone;
+  document.getElementById('chatSub').textContent=name?'+'+phone:'WhatsApp contact';
+
+  const btn=document.getElementById('handleBtn');
+  if(handledPhones.has(phone)){ btn.textContent='↩️ Unmark'; btn.classList.add('handled'); }
+  else { btn.textContent='✅ Mark Handled'; btn.classList.remove('handled'); }
+
+  document.getElementById('replyText').value='';
+  document.getElementById('replyStatus').style.display='none';
+
+  // Check if last message from customer is within 24 hours
+  const phoneMsgs = allMsgs.filter(m=>m.phone===phone);
+  const lastMsg = phoneMsgs[0];
+  const hoursSince = lastMsg ? (Date.now()/1000 - lastMsg.ts) / 3600 : 999;
+  const replyBox = document.getElementById('replyBoxWrap');
+  const expiredMsg = document.getElementById('replyExpired');
+  if(hoursSince > 24){
+    if(replyBox) replyBox.style.display='none';
+    if(expiredMsg) expiredMsg.style.display='block';
+  } else {
+    if(replyBox) replyBox.style.display='block';
+    if(expiredMsg) expiredMsg.style.display='none';
+  }
+
+  // Force show chat view before rendering
+  document.getElementById('chatEmpty').style.display='none';
+  const chatV=document.getElementById('chatView');
+  chatV.style.display='flex';
+  chatV.style.flexDirection='column';
+  chatV.style.flex='1';
+
+  renderChat(phone);
+  renderConvList();
+  if(window.innerWidth<=768) document.getElementById('chatPanel').scrollIntoView();
+}
+
+function renderChat(phone){
+  const msgs=allMsgs.filter(m=>m.phone===phone).slice().reverse();
+  const extras=(sentMessages[phone]||[]);
+  const seen=new Set(msgs.map(m=>m.ts));
+  const unique=extras.filter(m=>!seen.has(m.ts));
+  const all=[...msgs,...unique].sort((a,b)=>a.ts-b.ts);
+
+  const container=document.getElementById('chatMessages');
+  let lastDate='';
+  container.innerHTML=all.map(m=>{
+    const isSent=m.isSent||m.type==='sent';
+    const msgDate=new Date(m.ts*1000).toDateString();
+    let divider='';
+    if(msgDate!==lastDate){
+      lastDate=msgDate;
+      divider='<div class="date-divider"><span>'+formatDate(m.ts)+'</span></div>';
+    }
+    // Parse media content
+    let bubbleContent = m.text||m.intId||'[message]';
+    let mediaHtml = '';
+
+      // Normalize stored outgoing media markers
+      if(typeof bubbleContent==='string'){
+        bubbleContent = bubbleContent
+          .replace(/^📤\s*YOU:\s*/i,'')
+          .replace(/^YOU:\s*/i,'')
+          .trim();
+      }
+    if(bubbleContent.startsWith('[MEDIA:image:')){
+      const raw=bubbleContent.substring('[MEDIA:image:'.length).replace(/]$/,'');
+      const parts=raw.split(':id:');
+      const url=parts[0].trim();
+      const mediaId=(parts[1]||'').trim();
+
+      bubbleContent='';
+
+      const src=mediaId
+        ? '/admin/media/'+encodeURIComponent(mediaId)+'?token='+API_TOKEN
+        : url;
+
+      mediaHtml=
+        '<div style="max-width:260px">'+
+        '<img src="'+escapeHtml(src)+'" '+
+        'style="max-width:240px;max-height:260px;border-radius:8px;display:block;cursor:pointer;object-fit:cover" '+
+        'onclick="openChatImage(this.src)" '+
+        'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';">'+
+        '<a href="'+escapeHtml(src)+'" target="_blank" '+
+        'style="display:block;margin-top:8px;color:#128C7E;text-decoration:underline;font-size:12px">'+
+        '🔗 Open image / media</a>'+
+        '</div>';
+      } else if(bubbleContent.startsWith('[MEDIA:video:')){
+        const raw=bubbleContent.substring('[MEDIA:video:'.length).replace(/]$/,'');
+        const parts=raw.split(':id:');
+        const mediaId=(parts[1]||'').trim();
+        const src=mediaId
+          ? '/admin/media/'+encodeURIComponent(mediaId)+'?token='+API_TOKEN
+          : (parts[0]||'').trim();
+
+        bubbleContent='';
+        mediaHtml=
+          '<video controls preload="metadata" style="max-width:280px;max-height:320px;border-radius:8px;display:block">'+
+          '<source src="'+escapeHtml(src)+'">'+
+          '</video>'+
+          '<a href="'+escapeHtml(src)+'" target="_blank" style="display:block;margin-top:6px;color:#128C7E;font-size:12px">🎥 Open video</a>';
+
+      } else if(bubbleContent.startsWith('[MEDIA:audio:')){
+        const raw=bubbleContent.substring('[MEDIA:audio:'.length).replace(/]$/,'');
+        const parts=raw.split(':id:');
+        const mediaId=(parts[1]||'').trim();
+        const src=mediaId
+          ? '/admin/media/'+encodeURIComponent(mediaId)+'?token='+API_TOKEN
+          : (parts[0]||'').trim();
+
+        bubbleContent='';
+        mediaHtml=
+          '<audio controls preload="metadata" style="width:280px">'+
+          '<source src="'+escapeHtml(src)+'">'+
+          '</audio>';
+
+      } else if(bubbleContent.startsWith('[MEDIA:document:')){
+        const raw=bubbleContent.substring('[MEDIA:document:'.length).replace(/]$/,'');
+        const parts=raw.split(':id:');
+        const filename=(parts[0]||'Document').trim();
+        const mediaId=(parts[1]||'').trim();
+
+        const src=mediaId
+          ? '/admin/media/'+encodeURIComponent(mediaId)+'?token='+API_TOKEN
+          : '';
+
+        bubbleContent='';
+
+        if(src){
+          mediaHtml=
+            '<a href="'+escapeHtml(src)+'" target="_blank" '+
+            'style="display:block;padding:12px;background:rgba(255,255,255,.7);border-radius:8px;text-decoration:none;color:#111;min-width:220px">'+
+            '<div style="font-size:24px">📄</div>'+
+            '<div style="font-weight:600;word-break:break-word">'+escapeHtml(filename)+'</div>'+
+            '<div style="font-size:11px;color:#128C7E;margin-top:4px">Open / Download document</div>'+
+            '</a>';
+        }else{
+          bubbleContent='📄 '+escapeHtml(filename);
+        }
+
+      } else if(bubbleContent.startsWith('[MEDIA:sticker:')){
+        const raw=bubbleContent.substring('[MEDIA:sticker:'.length).replace(/]$/,'');
+        const parts=raw.split(':id:');
+        const mediaId=(parts[1]||'').trim();
+        const src=mediaId
+          ? '/admin/media/'+encodeURIComponent(mediaId)+'?token='+API_TOKEN
+          : (parts[0]||'').trim();
+
+        bubbleContent='';
+        mediaHtml=
+          '<img src="'+escapeHtml(src)+'" style="max-width:180px;max-height:180px;display:block">';
+      }
+    const mediaTag = m.msgType&&!['text','button','interactive','sent','reply'].includes(m.msgType)&&!bubbleContent.includes('[MEDIA')?
+      '<div style="font-size:11px;opacity:.7;margin-top:2px">📎 '+m.msgType+'</div>':'';
+    return divider+'<div class="msg-row '+(isSent?'out':'in')+'">'
+      +'<div class="bubble '+(isSent?'out':'in')+'">'
+      +(isSent?'':m.name?'<div class="bubble-name">'+m.name+'</div>':'')
+      +mediaHtml+bubbleContent
+      +mediaTag
+      +'<div class="bubble-time">'+timeAgo(m.ts)+'</div>'
+      +'</div></div>';
+  }).join('');
+  container.scrollTop=container.scrollHeight;
+}
+
+function toggleHandled(){
+  if(!currentPhone) return;
+  if(handledPhones.has(currentPhone)){
+    handledPhones.delete(currentPhone);
+    document.getElementById('handleBtn').textContent='✅ Mark Handled';
+    document.getElementById('handleBtn').classList.remove('handled');
+  } else {
+    handledPhones.add(currentPhone);
+    document.getElementById('handleBtn').textContent='↩️ Unmark';
+    document.getElementById('handleBtn').classList.add('handled');
+  }
+  localStorage.setItem('handled',JSON.stringify([...handledPhones]));
+  renderConvList();
+}
+
+function setMsg(text){ document.getElementById('replyText').value=text; document.getElementById('replyText').focus(); }
+
+async function sendReply(){
+  const text=document.getElementById('replyText').value.trim();
+  if(!text||!currentPhone) return;
+  showStatus('Sending...','');
+  try{
+    const r=await fetch('https://graph.facebook.com/v19.0/'+PHONE_ID+'/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+      body:JSON.stringify({messaging_product:'whatsapp',to:currentPhone,type:'text',text:{body:text}})
+    });
+    const d=await r.json();
+    if(d.messages){
+      showStatus('✅ Sent!','ok');
+      document.getElementById('replyText').value='';
+      storeSent(currentPhone, text);
+    } else { showStatus('❌ '+(d.error?.message||'Failed'),'err'); }
+  }catch(e){ showStatus('❌ '+e.message,'err'); }
+}
+
+let pendingImageFiles = [];
+let pendingImageIndex = 0;
+
+function previewImages(input){
+  const files = Array.from(input.files);
+  if(!files.length || !currentPhone){ input.value=''; return; }
+  pendingImageFiles = files;
+  pendingImageIndex = 0;
+  showImagePreview(0);
+  input.value='';
+}
+
+function showImagePreview(idx){
+  const file = pendingImageFiles[idx];
+  if(!file) return;
+  const url = URL.createObjectURL(file);
+  document.getElementById('imgPreview').src = url;
+  const total = pendingImageFiles.length;
+  document.getElementById('imgFileName').textContent = 
+    file.name + ' (' + (file.size/1024).toFixed(1) + ' KB)' + 
+    (total>1 ? ' — Image '+(idx+1)+' of '+total : '');
+  document.getElementById('imgModal').style.display = 'flex';
+}
+
+function cancelImage(){
+  pendingImageFiles = [];
+  pendingImageIndex = 0;
+  document.getElementById('imgModal').style.display = 'none';
+}
+
+async function confirmSendImage(){
+  if(!pendingImageFiles.length || !currentPhone) return;
+  document.getElementById('imgModal').style.display = 'none';
+  
+  for(let i=0; i<pendingImageFiles.length; i++){
+    const file = pendingImageFiles[i];
+    showStatus('Sending image '+(i+1)+' of '+pendingImageFiles.length+'...','');
+    try{
+      const fd=new FormData();
+      fd.append('messaging_product','whatsapp');
+      fd.append('file', file);
+      const ur=await fetch('https://graph.facebook.com/v19.0/'+PHONE_ID+'/media',{method:'POST',headers:{Authorization:'Bearer '+TOKEN},body:fd});
+      const ud=await ur.json();
+      if(!ud.id){ showStatus('❌ Upload failed for '+file.name,'err'); continue; }
+      const r=await fetch('https://graph.facebook.com/v19.0/'+PHONE_ID+'/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+        body:JSON.stringify({messaging_product:'whatsapp',to:currentPhone,type:'image',image:{id:ud.id}})
+      });
+      const d=await r.json();
+      if(d.messages){
+        storeSent(
+          currentPhone,
+          '[MEDIA:image::id:'+ud.id+']'
+        );
+      }
+      else showStatus('❌ '+(d.error?.message||'Failed'),'err');
+      await new Promise(r=>setTimeout(r,500));
+    }catch(e){ showStatus('❌ '+e.message,'err'); }
+  }
+  showStatus('✅ '+pendingImageFiles.length+' image(s) sent!','ok');
+  pendingImageFiles=[];
+  pendingImageIndex=0;
+}
+
+function previewImage(input){ previewImages(input); }
+async function sendImage(input){ previewImages(input); }
+
+
+async function sendMtexTemplate(tpl,to,successMessageId=null){
+  try{
+    const cfg=await emkayPrepareTemplateWithMedia(tpl,contactNames[to]||'Valued Customer');
+    const payload=emkayBuildTemplatePayload(tpl,to,contactNames[to]||'Valued Customer',cfg);
+    await emkayPostTemplate(payload);
+    if(typeof storeSent==='function')storeSent(to,'📋 [Template: '+tpl+']');
+    if(successMessageId){const el=document.getElementById(successMessageId);if(el){el.textContent='✅ Template sent successfully!';el.style.color='#2e7d32'}}
+    else showStatus('✅ Template sent!','ok');
+    return true;
+  }catch(e){
+    if(successMessageId){const el=document.getElementById(successMessageId);if(el){el.textContent='❌ '+e.message;el.style.color='#c62828'}}
+    else showStatus('❌ '+e.message,'err');
+    return false;
+  }
+}
+
+async function sendInlineTemplate(){
+  try{
+    const tpl=document.getElementById('inlineTplSelect').value;
+
+    if(!tpl){
+      showStatus('Select a template first','err');
+      return;
+    }
+
+    if(!currentPhone){
+      showStatus('❌ No customer selected','err');
+      return;
+    }
+
+    showStatus('Sending template...','');
+
+    await sendMtexTemplate(tpl,currentPhone);
+
+  }catch(e){
+    console.error('[M-TEX] Inline button error:',e);
+    showStatus('❌ '+e.message,'err');
+  }
+}
+
+async function sendExpiredTemplate(){
+  const tpl=document.getElementById('expiredTplSelect').value;
+  if(!tpl||!currentPhone){alert('Select a template and customer');return}
+  const el=document.getElementById('expiredTplResult');el.style.display='block';el.textContent='Sending...';
+  try{
+    const cfg=await emkayPrepareTemplateWithMedia(tpl,contactNames[currentPhone]||'Valued Customer');
+    await emkayPostTemplate(emkayBuildTemplatePayload(tpl,currentPhone,contactNames[currentPhone]||'Valued Customer',cfg));
+    el.textContent='✅ Template sent successfully!';el.style.color='#2e7d32';
+    if(typeof storeSent==='function')storeSent(currentPhone,'📋 [Template: '+tpl+']');
+  }catch(e){el.textContent='❌ '+e.message;el.style.color='#c62828'}
+}
+
+async function sendTemplate(){
+  if(!currentPhone){showStatus('❌ No customer selected','err');return}
+  const tpl=prompt('Approved template name:',allTemplates[0]?.name||'');
+  if(!tpl)return;
+  await sendMtexTemplate(tpl,currentPhone);
+}
+
+function openChatImage(src){
+  let modal=document.getElementById('chatImageModal');
+
+  if(!modal){
+    modal=document.createElement('div');
+    modal.id='chatImageModal';
+
+    modal.style.cssText=
+      'position:fixed;inset:0;background:rgba(0,0,0,.85);'+
+      'z-index:10000;display:none;align-items:center;'+
+      'justify-content:center;padding:30px;cursor:pointer';
+
+    modal.innerHTML=
+      '<div style="position:relative;max-width:95vw;max-height:95vh">'+
+      '<button onclick="event.stopPropagation();closeChatImage()" '+
+      'style="position:absolute;right:-12px;top:-12px;width:34px;height:34px;'+
+      'border:0;border-radius:50%;background:#fff;color:#111;font-size:22px;'+
+      'cursor:pointer">×</button>'+
+      '<img id="chatImageFull" '+
+      'style="max-width:90vw;max-height:90vh;border-radius:8px;display:block">'+
+      '</div>';
+
+    modal.onclick=function(e){
+      if(e.target===modal) closeChatImage();
+    };
+
+    document.body.appendChild(modal);
+  }
+
+  document.getElementById('chatImageFull').src=src;
+  modal.style.display='flex';
+}
+
+function closeChatImage(){
+  const modal=document.getElementById('chatImageModal');
+  if(modal) modal.style.display='none';
+}
+
+function storeSent(phone, text){
+  if(!sentMessages[phone]) sentMessages[phone]=[];
+  const ts=Math.floor(Date.now()/1000);
+  sentMessages[phone].push({text,ts,isSent:true});
+  fetch('/admin/sent?token='+API_TOKEN,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone,text:'📤 YOU: '+text})}).catch(()=>{});
+  renderChat(phone);
+}
+
+function showStatus(msg,type){
+  const el=document.getElementById('replyStatus');
+  el.textContent=msg;
+  el.style.display='block';
+  el.style.background=type==='ok'?'#DCF8C6':type==='err'?'#fee2e2':'#f0f2f5';
+  el.style.color=type==='ok'?'#128C7E':type==='err'?'#991b1b':'#666';
+  if(type==='ok') setTimeout(()=>el.style.display='none',2000);
+}
+
+// ── QUICK SEND ──
+async function quickSend(){
+  try{
+    const phone=document.getElementById('qs-phone').value.trim().replace(/\D/g,'');
+    const name=document.getElementById('qs-name').value.trim() || 'Valued Customer';
+    const tpl=document.getElementById('qs-tpl').value;
+
+    if(!phone || phone.length<10){
+      showResult('qs-result','Enter valid phone','err');
+      return;
+    }
+
+    if(!tpl){
+      showResult('qs-result','Select a template','err');
+      return;
+    }
+
+    const to=phone.startsWith('91') ? phone : '91'+phone;
+
+    /*
+     * IMPORTANT:
+     * tplObj must be declared BEFORE getTemplateMediaId().
+     */
+    const tplObj=allTemplates.find(t=>t.name===tpl);
+
+    console.log('[M-TEX QUICK] template:',tpl);
+    console.log('[M-TEX QUICK] recipient:',to);
+    console.log('[M-TEX QUICK] template object:',tplObj);
+
+    showResult('qs-result','Sending...','');
+
+    /*
+     * Use the same proven sender as the other buttons.
+     * This guarantees the M TEX media ID fallback is used.
+     */
+    const success=await sendMtexTemplate(tpl,to);
+
+    if(success){
+      showResult('qs-result','✅ Sent to +'+to,'ok');
+    }else{
+      showResult('qs-result','❌ Send failed','err');
+    }
+
+  }catch(e){
+    console.error('[M-TEX QUICK] ERROR:',e);
+
+    showResult(
+      'qs-result',
+      '❌ '+(e?.message || 'Send failed'),
+      'err'
+    );
+  }
+}
+
+function showResult(id,msg,type){
+  const el=document.getElementById(id);
+  el.style.display='block';
+  el.textContent=msg;
+  el.className='result-msg '+(type==='ok'?'result-ok':type==='err'?'result-err':'');
+}
+
+// ── BROADCAST ──
+function updateTplInfo(){
+  const tpl=document.getElementById('bc-tpl').value;
+  const t=allTemplates.find(x=>x.name===tpl);
+  const info=[];
+  if(t){
+    if(t.components?.some(c=>c.type==='HEADER'&&c.format==='IMAGE')) info.push('📷 Has image header');
+    if(t.components?.some(c=>c.type==='BODY'&&(c.text||'').includes('{{'))) info.push('👤 Uses name variable');
+	if(MEDIA_IDS[tpl]) info.push('✅ Image ready');
+  }
+  document.getElementById('bc-tpl-info').textContent=info.join(' · ')||'';
+}
+
+function parseCSV(input){
+  const file=input.files[0];
+  if(!file) return;
+
+  const isExcel=/\.(xlsx|xls)$/i.test(file.name);
+
+  if(isExcel){
+    const reader=new FileReader();
+
+    reader.onload=function(e){
+      try{
+        const workbook=XLSX.read(
+          new Uint8Array(e.target.result),
+          {type:'array'}
+        );
+
+        const sheet=workbook.Sheets[workbook.SheetNames[0]];
+
+        const rows=XLSX.utils.sheet_to_json(sheet,{
+          header:1,
+          defval:'',
+          raw:false
+        });
+
+        loadContactRows(rows,file.name);
+
+      }catch(err){
+        console.error('Excel error:',err);
+        alert('❌ Excel read error: '+err.message);
+      }
+    };
+
+    reader.readAsArrayBuffer(file);
+    return;
+  }
+
+  const reader=new FileReader();
+
+  reader.onload=function(e){
+    try{
+      const text=e.target.result
+        .replace(/^\uFEFF/,'')
+        .replace(/\r\n/g,'\n')
+        .replace(/\r/g,'\n');
+
+      /*
+       * Parse CSV properly, including quoted values.
+       */
+      const rows=[];
+      let row=[];
+      let field='';
+      let quoted=false;
+
+      for(let i=0;i<text.length;i++){
+        const ch=text[i];
+
+        if(ch==='"'){
+          if(quoted && text[i+1]==='"'){
+            field+='"';
+            i++;
+          }else{
+            quoted=!quoted;
+          }
+        }else if(ch===',' && !quoted){
+          row.push(field);
+          field='';
+        }else if(ch==='\n' && !quoted){
+          row.push(field);
+          rows.push(row);
+          row=[];
+          field='';
+        }else{
+          field+=ch;
+        }
+      }
+
+      if(field.length || row.length){
+        row.push(field);
+        rows.push(row);
+      }
+
+      loadContactRows(rows,file.name);
+
+    }catch(err){
+      console.error('CSV error:',err);
+      alert('❌ CSV read error: '+err.message);
+    }
+  };
+
+  reader.readAsText(file,'UTF-8');
+}
+
+
+function loadContactRows(rows,fileName){
+
+  if(!rows || !rows.length){
+    alert('❌ File is empty');
+    return;
+  }
+
+  /*
+   * Find header row.
+   */
+  let headerIndex=-1;
+  let phoneIndex=-1;
+  let nameIndex=-1;
+
+  for(let i=0;i<Math.min(rows.length,10);i++){
+
+    const headers=(rows[i]||[]).map(x=>
+      String(x).trim().toLowerCase()
+    );
+
+    const p=headers.findIndex(x=>
+      /^(phone|mobile|mobile no|mobile number|phone number|whatsapp|number|contact|contact number)$/.test(x) ||
+      /phone|mobile|whatsapp/.test(x)
+    );
+
+    const n=headers.findIndex(x=>
+      /^(name|customer name|client name|customer|client|person)$/.test(x) ||
+      /name|customer|client/.test(x)
+    );
+
+    if(p>=0){
+      headerIndex=i;
+      phoneIndex=p;
+      nameIndex=n;
+      break;
+    }
+  }
+
+  /*
+   * If no headers were found, assume:
+   * column 0 = phone
+   * column 1 = name
+   */
+  const startRow=headerIndex>=0 ? headerIndex+1 : 0;
+
+  if(phoneIndex<0) phoneIndex=0;
+  if(nameIndex<0) nameIndex=phoneIndex===0 ? 1 : 0;
+
+  console.log('Detected columns:',{
+    headerIndex,
+    phoneIndex,
+    nameIndex,
+    totalRows:rows.length
+  });
+
+  bcContacts=[];
+
+  for(let i=startRow;i<rows.length;i++){
+
+    const row=rows[i]||[];
+
+    let rawPhone=String(row[phoneIndex]??'').trim();
+    let name=String(row[nameIndex]??'').trim();
+
+    if(!rawPhone) continue;
+
+    /*
+     * Remove Excel numeric formatting.
+     */
+    rawPhone=rawPhone.replace(/\.0+$/,'');
+
+    /*
+     * Keep digits only.
+     */
+    let phone=rawPhone.replace(/\D/g,'');
+
+    /*
+     * Handle numbers such as:
+     * 9876543210
+     * 919876543210
+     */
+    if(phone.length===10){
+      phone='91'+phone;
+    }
+
+    if(phone.length===12 && phone.startsWith('91')){
+      // valid
+    }else{
+      continue;
+    }
+
+    if(!name) name='Valued Customer';
+
+    bcContacts.push({
+      phone,
+      name,
+      status:'pending'
+    });
+  }
+
+  document.getElementById('bcPreview').style.display='block';
+
+  document.getElementById('bcInfo').textContent=
+    bcContacts.length+
+    ' contacts loaded from '+
+    fileName;
+
+  document.getElementById('bcRows').innerHTML=
+    bcContacts.slice(0,20).map(c=>
+      '<div class="contact-row">'+
+      '<span>+'+c.phone+'</span>'+
+      '<span>'+escapeHtml(c.name)+'</span>'+
+      '<span id="bst-'+c.phone+'">pending</span>'+
+      '</div>'
+    ).join('')+
+    (bcContacts.length>20
+      ? '<div class="contact-row" style="justify-content:center;color:var(--muted)">...and '+
+        (bcContacts.length-20)+
+        ' more</div>'
+      : '');
+
+  document.getElementById('bc-start').disabled=
+    bcContacts.length===0;
+
+  bcLog(
+    'Loaded '+bcContacts.length+
+    ' contacts from '+fileName,
+    'info'
+  );
+
+  console.log(
+    'Broadcast contacts loaded:',
+    bcContacts.length
+  );
+}
+
+
+function escapeHtml(str){
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+}
+
+function clearCSV(){
+  bcContacts=[];
+  document.getElementById('bcPreview').style.display='none';
+  document.getElementById('bcFile').value='';
+  document.getElementById('bc-start').disabled=true;
+}
+
+async function loadAudience(){
+  const name=document.getElementById('bc-audience').value;
+
+  if(!name){
+    alert('Select an audience');
+    return;
+  }
+
+  try{
+    const r=await fetch('/admin/get-csv/'+encodeURIComponent(name)+'?token='+API_TOKEN);
+    const text=await r.text();
+
+    const lines=text
+      .replace(/^\uFEFF/,'')
+      .split(/\r?\n/)
+      .filter(l=>l.trim());
+
+    bcContacts=[];
+
+    lines.forEach(line=>{
+      if(/^\s*phone\s*,/i.test(line)) return;
+
+      const parts=line.split(',');
+      const rawPhone=(parts[0]||'').trim();
+      const n=(parts.slice(1).join(',')||'Valued Customer').trim();
+
+      let phone=rawPhone.replace(/\D/g,'');
+
+      if(phone.length===10){
+        phone='91'+phone;
+      }
+
+      if(phone.length>=10 && phone.length<=13){
+
+        const displayName=n || 'Valued Customer';
+
+        bcContacts.push({
+          phone:phone,
+          name:displayName,
+          status:'pending'
+        });
+
+        // Make audience name available to Inbox/chat immediately
+        if(displayName && displayName !== 'Valued Customer'){
+          contactNames[phone]=displayName;
+        }
+      }
+    });
+
+    document.getElementById('bcPreview').style.display='block';
+
+    document.getElementById('bcInfo').textContent=
+      bcContacts.length+' contacts loaded from '+name;
+
+    document.getElementById('bcRows').innerHTML=
+      bcContacts.slice(0,20).map(c=>
+        '<div class="contact-row">'+
+        '<span>+'+c.phone+'</span>'+
+        '<span>'+escapeHtml(c.name)+'</span>'+
+        '<span id="bst-'+c.phone+'">pending</span>'+
+        '</div>'
+      ).join('')+
+      (bcContacts.length>20
+        ? '<div class="contact-row" style="justify-content:center;color:var(--muted)">...and '+
+          (bcContacts.length-20)+' more</div>'
+        : '');
+
+    document.getElementById('bc-start').disabled=
+      bcContacts.length===0;
+
+    bcLog(
+      'Loaded '+bcContacts.length+
+      ' contacts from '+name,
+      'info'
+    );
+
+    // Refresh Inbox using the newly loaded names
+    renderConvList();
+
+    if(currentPhone){
+      renderChat(currentPhone);
+    }
+
+  }catch(e){
+    console.error('Audience load error:',e);
+    alert('Error loading: '+e.message);
+  }
+}
+
+async function saveAudience(){
+  const name=document.getElementById('bc-save-name').value.trim();
+  if(!name||!bcContacts.length){ alert('Enter name and load contacts first'); return; }
+  const csv='phone,name\n'+bcContacts.map(c=>c.phone+','+c.name).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const fd=new FormData();
+  fd.append('file',blob,name+'.csv');
+  fd.append('name',name);
+  try{
+    const r=await fetch('/admin/save-csv?token='+API_TOKEN,{method:'POST',body:fd});
+    const d=await r.json();
+    if(d.success){ bcLog('✅ Saved as '+d.name,'ok'); loadAudienceList(); }
+    else bcLog('❌ Save failed','err');
+  }catch(e){ bcLog('❌ '+e.message,'err'); }
+}
+
+async function startBroadcast(){
+  if(!bcContacts.length) return;
+
+  const tpl=document.getElementById('bc-tpl').value;
+  if(!tpl){
+    alert('Select a template');
+    return;
+  }
+
+  const delay=parseInt(document.getElementById('bc-delay').value);
+  let templateConfig;
+  try{
+    templateConfig=await emkayPrepareTemplateWithMedia(tpl,bcContacts[0]?.name||'Valued Customer');
+    for(const c of bcContacts)emkayBuildTemplatePayload(tpl,c.phone,c.name||'Valued Customer',templateConfig);
+  }catch(e){alert('Template configuration error: '+e.message);return}
+  if(!confirm('Template validated. Send to '+bcContacts.length+' recipients? Test with one recipient first.'))return;
+
+  stopBC=false;
+
+  document.getElementById('bc-start').style.display='none';
+  document.getElementById('bc-stop').style.display='inline-flex';
+  document.getElementById('bc-progress').style.display='block';
+  document.getElementById('bc-ok').textContent='0';
+  document.getElementById('bc-err').textContent='0';
+
+  let ok=0,err=0;
+
+  for(let i=0;i<bcContacts.length;i++){
+
+    if(stopBC) break;
+
+    const c=bcContacts[i];
+
+    document.getElementById('bc-progress-txt').textContent=
+      'Sending '+(i+1)+' of '+bcContacts.length+'...';
+
+    document.getElementById('bc-progress-fill').style.width=
+      ((i+1)/bcContacts.length*100)+'%';
+
+    try{
+
+      const payload=emkayBuildTemplatePayload(tpl,c.phone,c.name||'Valued Customer',templateConfig);
+      let d;
+      try{d=await emkayPostTemplate(payload)}catch(sendError){d={error:{message:sendError.message}}}
+
+      const statusEl=document.getElementById('bst-'+c.phone);
+
+      if(d.messages){
+
+        ok++;
+
+        if(statusEl){
+          statusEl.textContent='✅ sent';
+          statusEl.style.color='#2e7d32';
+        }
+
+      }else{
+
+        err++;
+
+        if(statusEl){
+          statusEl.textContent='❌ '+(d.error?.message||'failed');
+          statusEl.style.color='#c62828';
+        }
+
+        console.error(
+          'Broadcast error for '+c.phone+':',
+          JSON.stringify(d,null,2)
+        );
+
+      }
+
+    }catch(e){
+
+      err++;
+
+      const statusEl=document.getElementById('bst-'+c.phone);
+
+      if(statusEl){
+        statusEl.textContent='❌ '+e.message;
+        statusEl.style.color='#c62828';
+      }
+
+      console.error(
+        'Broadcast exception for '+c.phone+':',
+        e
+      );
+
+    }
+
+    document.getElementById('bc-ok').textContent=ok;
+    document.getElementById('bc-err').textContent=err;
+
+    if(i<bcContacts.length-1){
+      await new Promise(r=>setTimeout(r,delay));
+    }
+
+  }
+
+  document.getElementById('bc-start').style.display='inline-flex';
+  document.getElementById('bc-stop').style.display='none';
+
+  document.getElementById('bc-progress-txt').textContent=
+    'Completed: '+ok+' sent, '+err+' failed';
+
+  bcLog(
+    'Broadcast completed: '+ok+' sent, '+err+' failed',
+    err?'err':'ok'
+  );
+}
+
+
+function bcLog(msg,type){
+  const el=document.getElementById('bcLog');
+  const d=document.createElement('div');
+  d.className='log-'+type;
+  d.textContent=new Date().toLocaleTimeString('en-IN')+' — '+msg;
+  el.appendChild(d);
+  el.scrollTop=el.scrollHeight;
+}
+
+// ── HELPERS ──
+function timeAgo(ts){
+  const diff=Math.floor(Date.now()/1000-ts);
+  if(diff<60) return diff+'s ago';
+  if(diff<3600) return Math.floor(diff/60)+'m ago';
+  if(diff<86400) return Math.floor(diff/3600)+'h ago';
+  return new Date(ts*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+}
+
+function formatDate(ts){
+  const d=new Date(ts*1000);
+  const today=new Date();
+  if(d.toDateString()===today.toDateString()) return 'Today';
+  const yesterday=new Date(today); yesterday.setDate(yesterday.getDate()-1);
+  if(d.toDateString()===yesterday.toDateString()) return 'Yesterday';
+  return d.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+}
+
+// openChat defined above
+
+</script>
+</div><!-- /replyBoxWrap -->
+<!-- IMAGE PREVIEW MODAL -->
+<div id="imgModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:16px">
+  <div style="background:#fff;border-radius:12px;padding:16px;max-width:400px;width:90%;text-align:center">
+    <div style="font-size:14px;font-weight:600;margin-bottom:12px;color:#111">Send this image?</div>
+    <img id="imgPreview" style="max-width:100%;max-height:300px;border-radius:8px;display:block;margin:0 auto 12px"/>
+    <div style="font-size:12px;color:#667781;margin-bottom:16px" id="imgFileName"></div>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button onclick="cancelImage()" style="padding:10px 24px;border-radius:8px;border:1.5px solid #e9edef;background:#fff;cursor:pointer;font-size:14px">Cancel</button>
+      <button onclick="confirmSendImage()" style="padding:10px 24px;border-radius:8px;border:none;background:#25D366;color:#fff;cursor:pointer;font-size:14px;font-weight:600">Send ➤</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

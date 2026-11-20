@@ -530,6 +530,7 @@ Wholesale & Bulk Enquiries Welcome.`)">🤝 Sales Team</button>
         <div style="display:flex;gap:8px;margin-bottom:8px">
           <select class="form-select" id="bc-audience" style="flex:1"><option value="">-- Saved audiences --</option></select>
           <button class="btn btn-navy btn-sm" onclick="loadAudience()">Load</button>
+          <button class="btn btn-navy btn-sm" onclick="refreshDriveAudiences(this)">↻ Refresh Drive</button>
         </div>
         <div class="drop-zone" onclick="document.getElementById('bcFile').click()">
           <div style="font-size:24px;margin-bottom:8px">📊</div>
@@ -958,6 +959,25 @@ async function loadTemplates(){
     const inlineSel=document.getElementById('inlineTplSelect');
     if(inlineSel) inlineSel.innerHTML='<option value="">📋 Send a template...</option>'+(opts||'');
   }catch(e){}
+}
+
+
+async function refreshDriveAudiences(button) {
+  button.disabled=true;
+  const oldText=button.textContent;
+  button.textContent="Refreshing...";
+  try {
+    const token=new URLSearchParams(window.location.search).get("token") || API_TOKEN;
+    const response=await fetch("/admin/drive-audiences/refresh?token="+encodeURIComponent(token),{method:"POST"});
+    const raw=await response.text();
+    let data;
+    try { data=JSON.parse(raw); } catch(_) { throw Error("Server returned HTTP "+response.status+" instead of JSON. Check backend route."); }
+    if(!response.ok) throw Error(data.error || "HTTP "+response.status);
+    await loadAudienceList();
+    const summary=(data.results||[]).map(x=>x.source+": "+(x.status==="imported" ? x.contacts+" contacts" : "ERROR "+x.error)).join("\n");
+    alert(summary || "No supported files found");
+  } catch(error) { alert("Google Drive refresh failed: "+error.message); }
+  finally { button.disabled=false; button.textContent=oldText; }
 }
 
 async function loadAudienceList(){

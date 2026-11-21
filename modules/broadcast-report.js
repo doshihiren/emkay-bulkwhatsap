@@ -36,7 +36,7 @@ module.exports=function(app){
   for(const r of rows)for(const s of r.status.split("|"))counts[s]=(counts[s]||0)+1;
   res.json({ok:true,campaign:{id:job.id,template:job.template,audience:job.audienceName||"Not recorded",total:job.recipients.length,accepted:job.sent,apiFailed:job.failed,status:job.status},counts,rows,warning:"Historical statuses are matched by phone and time, NOT message ID. They may include other campaigns. Do not automatically retry."});
  });
- app.get("/admin/broadcast-report/:id.csv",(req,res)=>{
+ app.get("/admin/broadcast-report-csv/:id",(req,res)=>{
   const job=read(JOBS).find(j=>j.id===req.params.id);
   if(!job)return res.status(404).json({error:"Campaign not found"});
   const rows=rowsFor(job);

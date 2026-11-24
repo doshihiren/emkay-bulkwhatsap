@@ -374,6 +374,26 @@ body{background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
  #page-login{height:100dvh;min-height:0;overflow:auto}
 }
 @media(max-width:380px){.topbar-brand{font-size:12px}.status-txt{font-size:10px}.logout-btn{padding:6px 8px}.chat-header-actions{width:100%}.inbox-sidebar{height:25%}}
+
+/* Mobile inbox: one pane at a time, override legacy inline dimensions */
+.mobile-chat-back{display:none}
+@media(max-width:768px){
+ #page-inbox{height:100vh!important;height:100dvh!important;flex-direction:column!important;padding-top:100px!important;overflow:hidden!important}
+ #page-inbox .inbox-sidebar{height:auto!important;width:100%!important;flex:1 1 0;min-height:0;overflow:hidden}
+ #page-inbox .conv-list{flex:1 1 0;min-height:0;overflow-y:auto}
+ #page-inbox .chat-panel{display:none!important}
+ #page-inbox.mobile-chat-open .inbox-sidebar{display:none!important}
+ #page-inbox.mobile-chat-open .chat-panel{display:flex!important;flex:1 1 0;height:auto!important;min-height:0}
+ #chatView{height:auto!important;flex:1 1 0!important;overflow:hidden}
+ .mobile-chat-back{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:36px;height:36px;border:0;background:#f0f2f5;border-radius:50%;font-size:22px;color:#128C7E;cursor:pointer}
+ #page-inbox .chat-header-actions{width:auto;flex-wrap:wrap}
+ #page-inbox .chat-header{flex-shrink:0}
+ #page-inbox .chat-messages{flex:1 1 0;max-height:none!important;min-height:0;overflow-y:auto}
+ #replyBoxWrap{padding-bottom:max(8px,env(safe-area-inset-bottom))!important}
+ #replyBoxWrap>div:first-child{overflow-x:auto;flex-wrap:nowrap}
+ #replyBoxWrap .qr-btn{flex-shrink:0}
+ #replyExpired select,#inlineTplSelect{width:0;flex:1 1 0}
+}
 </style>
 </head>
 <body>
@@ -487,6 +507,7 @@ body{background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
     </div>
     <div id="chatView" style="display:none;flex-direction:column;height:100%">
       <div class="chat-header">
+        <button type="button" class="mobile-chat-back" aria-label="Back to conversations" onclick="mobileInboxBack()">&#8592;</button>
         <div class="conv-avatar" id="chatAvatar">?</div>
         <div class="chat-header-info">
           <div class="chat-header-name" id="chatName">—</div>
@@ -878,7 +899,11 @@ function doLogout(){
 }
 
 // ── NAVIGATION ──
+function mobileInboxBack(){
+  document.getElementById('page-inbox').classList.remove('mobile-chat-open');
+}
 function showPage(id, btn){
+  if(id==='inbox') mobileInboxBack();
   // Hide all pages except login
   ['dashboard','inbox','broadcast'].forEach(p=>{
     const el=document.getElementById('page-'+p);
@@ -1252,7 +1277,8 @@ function openChat(phone){
 
   renderChat(phone);
   renderConvList();
-  if(window.innerWidth<=768) document.getElementById('chatPanel').scrollIntoView();
+  document.getElementById('page-inbox').classList.add('mobile-chat-open');
+  if(window.innerWidth<=768) requestAnimationFrame(()=>{const el=document.getElementById('chatMessages');el.scrollTop=el.scrollHeight;});
 }
 
 function renderChat(phone){

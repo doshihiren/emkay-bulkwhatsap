@@ -332,6 +332,48 @@ body{background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
   .sidebar-w{width:100%}
   .topbar-nav{display:none}
 }
+
+/* Responsive layout overrides */
+@media(max-width:768px){
+ body{height:100dvh;overflow:hidden}
+ .topbar{height:100px;padding:8px 12px;flex-wrap:wrap;gap:4px}
+ .topbar-brand{font-size:14px;min-width:0}
+ .topbar-right{gap:5px;margin-left:auto}
+ .status-pill{padding:4px 7px}
+ .topbar-nav{display:flex;order:3;width:100%;overflow-x:auto;justify-content:space-between;gap:3px}
+ .nav-btn{flex:1;padding:8px 6px;white-space:nowrap;font-size:12px}
+ .page,#page-dashboard,#page-broadcast{height:100dvh;padding-top:100px}
+ .dash-body,.broadcast-body{width:100%;min-width:0;padding:12px}
+ .stats-row{gap:8px;margin-bottom:12px}
+ .stat-card{padding:12px;min-width:0}
+ .stat-num{font-size:24px}
+ .dash-grid{gap:12px;grid-template-columns:minmax(0,1fr)}
+ .card-head{flex-wrap:wrap;gap:8px}
+ .broadcast-card{padding:14px;min-width:0}
+ .broadcast-card .form-group>div{flex-wrap:wrap}
+ .broadcast-card select,.broadcast-card input{min-width:0;max-width:100%}
+ .contact-row{gap:8px;overflow-wrap:anywhere}
+ .contact-preview{overflow:auto}
+ #page-inbox{height:100dvh;padding-top:100px;flex-direction:column;min-height:0}
+ .inbox-sidebar{width:100%;height:32%;min-height:0;flex-shrink:0}
+ .chat-panel{width:100%;height:auto;flex:1;min-height:0;min-width:0;overflow:hidden}
+ #chatView{min-height:0;min-width:0}
+ .chat-header{padding:7px 9px;gap:6px;flex-wrap:wrap;flex-shrink:0}
+ .chat-header-info{min-width:0;overflow-wrap:anywhere}
+ .chat-header-actions{gap:3px;flex-wrap:wrap}
+ .icon-btn{padding:5px;font-size:11px}
+ .chat-messages{max-height:none;padding:8px;min-height:0}
+ .bubble{max-width:88%;overflow-wrap:anywhere}
+ .bubble img,.bubble video{max-width:100%;height:auto}
+ #replyBoxWrap,#replyExpired{flex-shrink:0;min-width:0;padding:7px 8px!important}
+ #replyBoxWrap>div{min-width:0}
+ #inlineTplSelect,#expiredTplSelect,.reply-textarea{min-width:0;font-size:16px!important}
+ .qr-btn{font-size:12px;padding:7px 10px}
+ .send-btn{width:38px;height:38px}
+ .login-box{width:calc(100% - 24px);padding:24px}
+ #page-login{height:100dvh;min-height:0;overflow:auto}
+}
+@media(max-width:380px){.topbar-brand{font-size:12px}.status-txt{font-size:10px}.logout-btn{padding:6px 8px}.chat-header-actions{width:100%}.inbox-sidebar{height:25%}}
 </style>
 </head>
 <body>
@@ -478,6 +520,17 @@ Kindly share your visiting card/contact details with us, so our team can connect
 
 Thank you.
 EMKAY TRENDZ`)">📇 Share Details</button>
+            <button class="qr-btn" onclick="setMsg(`Thank you for your response. 🙏
+
+For fabric details, samples, pricing & orders, kindly connect with our sales team:
+
+📞 Natwar Prajapati: +91 93280 62066
+📞 Rangaram Dewasi: +91 91044 93036
+
+Our team will assist you further.
+
+EMKAY TRENDZ
+Wholesale & Bulk Enquiries Welcome.`)">🤝 Sales Team Mtex</button>
             <button class="qr-btn" onclick="setMsg(`Thank you for your response. 🙏
 
 For fabric details, samples, pricing & orders, kindly connect with our sales team:

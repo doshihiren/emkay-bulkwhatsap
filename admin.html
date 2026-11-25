@@ -495,6 +495,7 @@ body{background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
       <button class="flt" onclick="setFilter('unhandled',this)">🔴 Pending</button>
       <button class="flt" onclick="setFilter('handled',this)">✅ Handled</button>
     </div>
+    <div style="padding:8px 12px;border-bottom:1px solid #E9EDEF;flex-shrink:0"><button class="btn btn-navy btn-sm btn-block" onclick="downloadRepliedContacts()">Download Replied Contacts Report (CSV)</button></div>
     <div class="conv-list" id="convList">
       <div style="padding:40px;text-align:center;color:var(--muted)">Loading conversations...</div>
     </div>
@@ -902,6 +903,14 @@ function doLogout(){
 }
 
 // ── NAVIGATION ──
+async function downloadRepliedContacts(){
+ try{
+  const token=new URLSearchParams(location.search).get("token")||decodeURIComponent(API_TOKEN);
+  const r=await fetch("/admin/replied-contacts-report.csv?token="+encodeURIComponent(token),{cache:"no-store"});
+  if(!r.ok||!(r.headers.get("content-type")||"").includes("text/csv"))throw Error("Report unavailable (HTTP "+r.status+")");
+  const url=URL.createObjectURL(await r.blob());const a=document.createElement("a");a.href=url;a.download="emkay-replied-contacts.csv";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ }catch(e){alert(e.message);}
+}
 function mobileInboxBack(){
   document.getElementById('page-inbox').classList.remove('mobile-chat-open');
 }
